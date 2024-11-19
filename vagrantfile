@@ -1,0 +1,46 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+    # MAQUINA DE GATEWAY
+    config.vm.define "VM3" do |gw|
+      gw.vm.box = "ubuntu/focal64"
+      gw.vm.provider "virtualbox" do |vb|
+        vb.memory = 2048
+        vb.cpus = 2
+        vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+        vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+      end
+      gw.vm.network "public_network", type: "dhcp", bridge: "wlp2s0"
+      gw.vm.network "private_network", type: "private_network", ip: "192.168.56.9"
+      gw.vm.hostname = "vm3"
+      gw.vm.synced_folder "./shared_folder", "/vagrant_shared"
+      gw.vm.network "forwarded_port", guest: 83, host: 8380
+      gw.vm.provision "shell", path: "provisioners/vm3_provision.sh"
+    end
+    # MAQUINA DE SERVIDOR WEB
+    config.vm.define "VM1" do |web|
+      web.vm.box = "ubuntu/focal64"
+      web.vm.provider "virtualbox" do |vb|
+        vb.memory = 2048
+        vb.cpus = 2
+      end
+      web.vm.network "private_network", type: "private_network", ip: "192.168.56.10"
+      web.vm.synced_folder "/var/www/html", "/var/www/html"
+      web.vm.hostname = "vm1"
+      web.vm.network "forwarded_port", guest: 81, host: 8180
+      web.vm.provision "shell", path: "provisioners/vm1_provision.sh"
+    end
+    # MAQUINA DE SERVIDOR DE BANCO DE DADOS
+    config.vm.define "VM2" do |bd|
+      bd.vm.box = "ubuntu/focal64"
+      bd.vm.provider "virtualbox" do |vb|
+        vb.memory = 2048
+        vb.cpus = 2
+      end
+      bd.vm.network "private_network", type: "private_network", ip: "192.168.56.11"
+      bd.vm.hostname = "vm2"
+      bd.vm.network "forwarded_port", guest: 82, host: 8280
+      bd.vm.provision "shell", path: "provisioners/vm2_provision.sh"
+    end
+  end
