@@ -1,26 +1,23 @@
 #!/bin/bash
 
-# Definindo gateway padrão para o ip da VM3
-sudo ip route del default
-sudo ip route add default via 192.168.56.9 dev enp0s8
+# Habilitar IP Forwarding
+sudo sysctl -w net.ipv4.ip_forward=1
 
-# Atualizando e instalando funcionalidade
-apt-get update
-apt-get install -y mysql-server
-apt-get install net-tools
+# Configurar NAT para compartilhar conexão com a Internet
+sudo iptables -t nat -A POSTROUTING -o enp0s3 -j MASQUERADE
 
-# Definindo IP privado para a interface enp0s8
-sudo ifconfig enp0s8 192.168.56.11 netmask 255.255.255.0 up
+# Buscar atualizações no sistema
+sudo apt-get update
 
-# Atribuindo servidor DNS a rede
+# Instalar o net-tools
+sudo apt-get install net-tools
+
+# Criar um ip na interface de rede privada
+sudo ifconfig enp0s8 192.168.56.9 netmask 255.255.255.0 up
+
+# Definir o DNS nas linhas do arquivo /reolv.conf
 sudo echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf
 sudo echo "nameserver 8.8.4.4" | sudo tee -a /etc/resolv.conf
 
-# Definindo bind-address como 0.0.0.0 para permitir acesso remoto
-echo "bind-address = 0.0.0.0" | sudo tee -a /etc/mysql/mysql.conf.d/mysqld.cnf
-sudo systemctl restart mysql
-
-# Acessando e criando um novo usuário no mysql
-sudo mysql -e "CREATE USER 'vm'@'%' IDENTIFIED BY '1234';"
-sudo mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'vms'@'%' WITH GRANT OPTION;"
-sudo mysql -e "FLUSH PRIVILEGES;"
+# Salvar as DNS no arquivo
+sudo sysctl -p
