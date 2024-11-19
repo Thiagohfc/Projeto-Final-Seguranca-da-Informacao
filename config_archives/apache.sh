@@ -1,0 +1,1 @@
+sudo docker run -dit --name web_apacheServer -p 8080:80 -v /www:/usr/local/apache2/htdocs/ httpd:2.4 
