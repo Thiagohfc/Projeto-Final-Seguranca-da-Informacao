@@ -28,6 +28,12 @@ Vagrant.configure("2") do |config|
       sudo ufw allow 443
       sudo ufw --force enable
 
+      # Hardening: FailBan para proteção contra ataques de força bruta
+      sudo apt install fail2ban -y
+      sudo systemctl enable fail2ban
+      sudo systemctl start fail2ban
+
+
       # Docker
       sudo apt install -y docker.io
       sudo systemctl enable docker
@@ -52,13 +58,15 @@ Vagrant.configure("2") do |config|
     virtual.vm.provision "shell", inline: <<-SHELL
       # Instalar Ferramentas de Teste
       sudo apt update && sudo apt install -y curl wget
+
+      # Firewall para o hardening de servidores
       sudo apt install ufw -y
       sudo ufw default deny incoming
       sudo ufw default allow outgoing
       sudo ufw allow ssh
       sudo ufw allow 81   # Porta web
       sudo ufw allow 82   # Porta banco de dados (se necessário externo)
-sudo ufw enable
+      sudo ufw enable
     SHELL
   end
 end
