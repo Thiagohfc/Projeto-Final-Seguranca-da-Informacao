@@ -52,6 +52,13 @@ Vagrant.configure("2") do |config|
     virtual.vm.provision "shell", inline: <<-SHELL
       # Instalar Ferramentas de Teste
       sudo apt update && sudo apt install -y curl wget
+      sudo apt install ufw -y
+      sudo ufw default deny incoming
+      sudo ufw default allow outgoing
+      sudo ufw allow ssh
+      sudo ufw allow 81   # Porta web
+      sudo ufw allow 82   # Porta banco de dados (se necessário externo)
+sudo ufw enable
     SHELL
   end
 end
