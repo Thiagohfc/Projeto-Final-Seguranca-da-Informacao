@@ -1,7 +1,6 @@
 # Projeto-Final-Seguran-a-da-Informacao
 
-Este projeto configura um ambiente de laboratório de administração de redes com 3 máquinas virtuais usando Vagrant.
-
+Este projeto configura um ambiente de laboratório de administração de redes com 3 máquinas virtuais usando Vagrant e VirtualBox. As VMs estão configuradas para simular um ambiente de rede com um servidor web, um gateway e uma máquina de teste, além de provisionamento automatizado com scripts Shell.
 
 # Estrutura do Projeto
 - shared_folder
@@ -67,3 +66,10 @@ VM2 (IP Privado)-->> VM1 (IP Privado): Se comunica por IP
 VM2 (IP Privado)-->> VM3 (IP Privado): Se comunica por IP
 VM3 (IP Privado)-->> VM1 (IP Privado): Se comunica por IP
 VM3 (IP Privado)-->> VM2 (IP Privado): Se comunica por IP
+
+```
+Considerações Finais
+
+ - O ambiente foi projetado para simular um ambiente de rede típico, permitindo o teste de servidores, gateways e conectividade de rede.
+ - Todos os serviços foram provisionados automaticamente via scripts, mas podem ser ajustados conforme as necessidades.
+ - Certifique-se de que as portas necessárias estejam liberadas no firewall do host.
