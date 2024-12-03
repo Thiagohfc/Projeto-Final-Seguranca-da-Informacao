@@ -1,7 +1,15 @@
 #!/bin/bash
 
-apt update
-apt install -y docker.io
+# Baixa a imagem oficial do Apache
 docker pull httpd
 
-sudo docker run -d -v /vagrantWeb:/usr/local/apache2/htdocs/ --restart always --name web -p 80:80 httpd
+# Inicia o container com o Apache, montando o diretório de conteúdo e configuração
+sudo docker build -t meu-apache /vagrantWeb/
+sudo docker run -d --net=host --name apache-container meu-apache
+
+# Logs de auditoria
+sudo apt install -y auditd
+sudo systemctl enable auditd
+sudo auditctl -w /vagrantWeb/html -p rwxa
+echo "0 2 * * * rsync -av /var/log/audit/ /backup/logs/" | sudo tee -a /etc/crontab
+

@@ -1,0 +1,12 @@
+Log created: 2024-12-03T01:29:03.215741000Z
+Process ID:  166814 (0x28b9e)
+Parent PID:  1 (0x1)
+Executable:  /usr/lib/virtualbox/VBoxHeadless
+Arg[0]: /usr/lib/virtualbox/VBoxHeadless
+Arg[1]: --comment
+Arg[2]: Projeto-Final-Seguranca-da-Informacao_web_server_1733188537749_6197
+Arg[3]: --startvm
+Arg[4]: f18e5e56-1058-4086-a394-75dbf23dacfa
+Arg[5]: --vrde
+Arg[6]: config
+AddRef: illegal refcnt=3221225469 state=2

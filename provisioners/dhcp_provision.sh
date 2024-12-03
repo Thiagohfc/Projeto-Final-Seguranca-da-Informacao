@@ -3,9 +3,6 @@
 sudo sysctl -w net.ipv4.ip_forward=1
 sudo iptables -t nat -A POSTROUTING -o enp0s3 -j MASQUERADE
 
-apt update
-apt install -y docker.io
-apt install -y net-tools
 docker pull networkboot/dhcpd
 
 sudo docker run -v dhcpd_data:/data --name temp_container busybox true
