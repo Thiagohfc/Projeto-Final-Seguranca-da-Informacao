@@ -49,15 +49,133 @@ Este projeto configura um servidor WEB "seguro" que tem como base os principais 
    vagrant destroy
    ```
 
-# Configuração de Hardware do Ambiente Virtual
+# Planejamento de Hardware
 
 ## Especificações Gerais
 
-- **Sistema Operacional Base**: Ubuntu 20.04 (focal64)
-- **Provedor de Virtualização**: VirtualBox
-- **Gerenciador de Ambientes**: Vagrant
+- **Processador (CPU): Dual Intel Xeon Gold 6230R ou AMD EPYC 7282**
+- **Memória RAM: 128 GB DDR4**
+- **Armazenamento:**
+	- SSD 2 TB NVMe (RAID 10 para o sistema operacional e bancos de dados).
+	- HDD 10 TB (RAID 5 para arquivos de mídia e backups).
+	- Controladora RAID: Hardware RAID com cache de bateria.
+	- Placa de Rede: Dual 10 Gigabit Ethernet
+	- Fonte de Alimentação: 800W redundante, certificação 80 PLUS Platinum
+- **Uso: Hospedagem de múltiplos serviços (site, sistemas acadêmicos, repositórios de arquivos, streaming de aulas), suportando até 2000 acessos simultâneos.**
 
 ---
+
+## Instalação e Configuração do Sistema Operacional
+
+### Etapa 1: Escolha do Sistema Operacional
+
+- Ubuntu Server: Fácil de usar, bem documentado, ideal para servidores de pequeno e médio porte.
+
+Certifique-se de ter backup de dados importantes antes de realizar a instalação.
+Tenha uma lista de configurações planejadas para evitar retrabalhos.
+
+### Etapa 2: Instalação do Sistema Operacional
+
+- Baixe a ISO oficial do sistema operacional.
+- Crie um pendrive bootável usando ferramentas como Rufus ou BalenaEtcher.
+- Configuração de Boot
+- Acesse a BIOS/UEFI e configure o boot para iniciar pelo pendrive.
+
+**Procedimento de Instalação**
+
+- Escolha "Instalar Ubuntu Server" ou equivalente.
+- Configure o idioma e o teclado.
+- Particionamento de Disco: Use LVM (Logical Volume Manager) para facilitar expansões futuras.
+- Configure o usuário administrador e defina uma senha forte.
+- Selecione pacotes básicos, como SSH e servidor web (opcional).
+
+### Etapa 3: Configuração Básica Pós-Instalação
+
+**Atualizações do Sistema**
+
+```bash
+sudo apt update && sudo apt upgrade -y  # Para distribuições baseadas em Debian/Ubuntu
+```
+**Configuração da Rede**
+
+- Edite o arquivo de rede, por exemplo:
+  
+```bash
+sudo nano /etc/netplan/00-installer-config.yaml
+```
+- Exemplo de configuração:
+```bash
+network:
+  ethernets:
+    eth0:
+      addresses: [192.168.1.100/24]
+      gateway4: 192.168.1.1
+      nameservers:
+        addresses: [8.8.8.8, 8.8.4.4]
+  version: 2
+```
+- Aplique as configurações:
+
+```bash
+sudo netplan apply
+```
+**Configuração de Nome de Host**
+
+```bash
+sudo hostnamectl set-hostname servidor-instituto
+```
+
+### Etapa 4: Configuração de Serviços
+
+**Servidor Web**
+
+- Linux (Apache):
+
+```bash
+sudo apt install apache2 -y  # Para Apache
+```
+
+- Configure o diretório de hospedagem e permissões:
+
+```bash
+sudo mkdir -p /var/www/instituto
+sudo chown -R www-data:www-data /var/www/instituto
+```
+### Etapa 5: Configuração de Segurança
+
+**Firewall**
+
+```bash
+sudo iptables -F
+sudo iptables -X
+```
+
+```bash
+sudo iptables -P INPUT DROP
+sudo iptables -P OUTPUT ACCEPT
+```
+```bash
+sudo iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+sudo iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+sudo iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+sudo iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
+sudo iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED, -j ACCEPT
+sudo iptables -A INPUT -p udp --sport 53 -j ACCEPT
+sudo iptables -A OUTPUT -o lo -j ACCEPT
+```
+
+**Acesso SSH**
+
+- Configure o acesso SSH para maior segurança:
+```bash
+sudo nano /etc/ssh/sshd_config
+```
+- Desative o login de root (PermitRootLogin no).
+- Altere a porta padrão de 22 para algo como 2222.
+- Reinicie o serviço:
+```bash
+sudo systemctl restart ssh
+```
 
 ## Configuração do Hardware da Máquina Virtual
 
@@ -80,7 +198,7 @@ Este projeto configura um servidor WEB "seguro" que tem como base os principais 
   - `./DockerDHCP` -> `/vagrantDHCP`
   - `./DockerWeb` -> `/vagrantWeb`
 
-## Provisionamento
+## Provisionamento Máquina Virtual
 
 Os scripts de provisionamento do servidor está localizado no diretório "Providers". Cada script executa configurações específicas que garantem o funcionamento e a segurança do servidor.
 
