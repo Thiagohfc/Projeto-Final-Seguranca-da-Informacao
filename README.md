@@ -56,9 +56,8 @@ Este projeto configura um servidor WEB "seguro" que tem como base os principais 
 - **Processador (CPU): Dual Intel Xeon Gold 6230R ou AMD EPYC 7282**
 - **Memória RAM: 128 GB DDR4**
 - **Armazenamento:**
-	- SSD 2 TB NVMe (RAID 10 para o sistema operacional e bancos de dados).
-	- HDD 10 TB (RAID 5 para arquivos de mídia e backups).
-	- Controladora RAID: Hardware RAID com cache de bateria.
+	- SSD 2 TB NVMe
+	- HDD 10 TB
 	- Placa de Rede: Dual 10 Gigabit Ethernet
 	- Fonte de Alimentação: 800W redundante, certificação 80 PLUS Platinum
 - **Uso: Hospedagem de múltiplos serviços (site, sistemas acadêmicos, repositórios de arquivos, streaming de aulas), suportando até 2000 acessos simultâneos.**
