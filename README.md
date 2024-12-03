@@ -7,7 +7,6 @@ Este projeto configura um servidor WEB "seguro" que tem como base os principais 
 - DockerDHCP
 - DockerWeb
 - provisioners/
-	- dhcp_provision.sh
  	- docker_provision.sh
 	- firewall_provision.sh
 	- hardening_provision.sh

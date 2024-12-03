@@ -11,10 +11,10 @@ Vagrant.configure("2") do |config|
     web.vm.box = "ubuntu/focal64"
     web.vm.hostname = "web-server"
     web.vm.network "private_network", ip: "192.168.56.2"
-    web.vm.network "forwarded_port", guest: 80, host: 8080
+    web.vm.network "forwarded_port", guest: 80, host: 8080 # Para web
+    #web.vm.network "forwarded_port", guest: 2222, host: 2223
     #web.vm.network "forwarded_port", guest: 2222, host: 2222, id: "ssh"
     #web.ssh.port = 2222
-    web.vm.synced_folder "./DockerDHCP", "/vagrantDHCP"
     web.vm.synced_folder "./DockerWeb", "/vagrantWeb"
     #config.ssh.username = "dockeruser"
 
@@ -32,26 +32,19 @@ Vagrant.configure("2") do |config|
       apt install -y net-tools
 
       # Criando o usuário e configurando permissões
-      sudo useradd -m -s /bin/bash dockeruser
-      echo "dockeruser ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/dockeruser
+      sudo useradd -m -s /bin/bash Web
+      echo "Web ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/Web
 
       # Configurando sem senha para o usuário
-      sudo passwd -d dockeruser
-
-      # Adicionando o usuário ao grupo docker
-      sudo usermod -aG docker dockeruser
+      sudo passwd -d Web
 
       # Configurando permissões na pasta de trabalho
       # Garantindo que os diretórios existam antes de alterar permissões
       if [ -d "/vagrantWeb" ]; then
-        sudo chown -R dockeruser:dockeruser /vagrantWeb
+        sudo chown -R Web:Web /vagrantWeb
       fi
 
-      if [ -d "/vagrantDHCP" ]; then
-        sudo chown -R dockeruser:dockeruser /vagrantDHCP
-      fi
-
-      sudo su dockeruser
+      sudo su Web
 
     SHELL
 
@@ -60,25 +53,11 @@ Vagrant.configure("2") do |config|
     web.vm.provision "shell", path: "provisioners/docker_provision.sh"
     web.vm.provision "shell", path: "provisioners/ssh_provision.sh"
     web.vm.provision "shell", path: "provisioners/hardening_provision.sh"
-    web.vm.provision "shell", path: "provisioners/dhcp_provision.sh"
     web.vm.provision "shell", path: "provisioners/web_provision.sh"
     web.vm.provision "shell", path: "provisioners/services_provision.sh"
-  end
 
-  # Máquina de Teste: Ferramenta de Verificação
-  config.vm.define "vmTeste" do |virtual|
-    virtual.vm.box = "ubuntu/focal64"
-    virtual.vm.hostname = "MaquinaTeste"
-    virtual.vm.network "private_network", type: "dhcp"
-
-    virtual.vm.provision "shell", inline: <<-SHELL
-      # Instalar Ferramentas de Teste
-      sudo apt update && sudo apt upgrade -y
-      sudo apt autoremove -y
-      sudo apt install net-tools -y
-
-      # Testes de Conectividade e Segurança
-      curl -I http://192.168.56.2:80
-    SHELL
+    # Configurar o Vagrant para usar a porta correta após o provisionamento
+    #config.ssh.forward_agent = true
+    #config.ssh.port = 2223
   end
 end
