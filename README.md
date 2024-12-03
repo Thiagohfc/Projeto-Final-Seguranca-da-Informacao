@@ -24,11 +24,31 @@ Este projeto configura um servidor WEB "seguro" que tem como base os principais 
 
 ## Instruções de Uso
 
-1. Clone o repositório do Github.
-2. Acesse o diretório pelo terminal e execute o comando "vagrant up" para iniciar o provisionamento do servidor.
-3. Verifique os status do servidor com o comando "vagrant status" e observe se está em execução ou não.
-4. Após verificar os status do servidor, digite "vagrant ssh" junto com o nome da VM (web_server) para iniciar o shell ou também poderá acessar a VM pelo Virtualbox.
-5. Por fim, desligue o servidor digitando "vagrant halt", e caso queira apaga-la, digite "vagrant destroy".
+1. Clone o repositório do GitHub:
+   ```bash
+   git clone <url-do-repositorio>
+   cd Projeto-Final-Seguranca-da-Informacao
+   ```
+2. Inicie o provisionamento do servidor:
+   ```bash
+   vagrant up
+   ```
+3. Verifique o status do servidor:
+   ```bash
+   vagrant status
+   ```
+4. Conecte-se ao servidor via SSH ou acesse pelo VirtualBox:
+   ```bash
+   vagrant ssh web_server
+   ```
+5. Para desligar o servidor, execute:
+   ```bash
+   vagrant halt
+   ```
+6. Caso precise apagar o ambiente virtual:
+   ```bash
+   vagrant destroy
+   ```
 
 # Configuração de Hardware do Ambiente Virtual
 
@@ -70,11 +90,11 @@ Os scripts de provisionamento do servidor está localizado no diretório "Provid
 - Configurações de firewall.
 - Configurações de SSH.
 - Configurações de Hardening.
-- Instalaçoes de serviços.
-- Construção e execução do servidor de apache via docker.
+- Instalação de serviços essenciais.
+- Configuração e execução do servidor Apache via Docker
 
 ## Considerações Finais
 
- - O ambiente foi configurado para simular um servidor de web real.
- - Todos os serviços foram provisionados automaticamente via scripts, mas podem ser ajustados conforme as necessidades.
- - Certifique-se de que as portas necessárias estejam liberadas no firewall do host.
+ - O ambiente foi configurado para simular um servidor WEB real.
+ - Todos os serviços foram provisionados automaticamente via scripts, mas podem ser ajustados conforme necessário.
+ - Certifique-se de que as portas necessárias estejam liberadas no firewall do host para garantir o funcionamento correto.
