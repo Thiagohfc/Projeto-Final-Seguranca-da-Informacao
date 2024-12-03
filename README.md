@@ -1,4 +1,4 @@
-# Projeto-Final-Seguran-a-da-Informacao
+# Projeto-Final-Seguranca-da-Informacao
 
 Este projeto configura um servidor WEB "seguro" que tem como base os principais pilares da segurança da informação, aderindo de práticas de hardening para amenizar os riscos que podem vir a acontecer durante o seu uso.
 
