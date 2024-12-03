@@ -1,14 +1,21 @@
 # Projeto-Final-Seguran-a-da-Informacao
 
-Este projeto configura um ambiente de laboratório de administração de redes com 3 máquinas virtuais usando Vagrant e VirtualBox. As VMs estão configuradas para simular um ambiente de rede com um servidor web, um gateway e uma máquina de teste, além de provisionamento automatizado com scripts Shell.
+Este projeto configura um servidor WEB "seguro" que tem como base os principais pilares da segurança da informação, aderindo de práticas de hardening para amenizar os riscos que podem vir a acontecer durante o seu uso.
 
 # Estrutura do Projeto
-- shared_folder
-- vagrantfile
+
+- DockerDHCP
+- DockerWeb
 - provisioners/
-	- vm1_provision.sh
-	- vm2_provision.sh
+	- dhcp_provision.sh
+ 	- docker_provision.sh
+	- firewall_provision.sh
+	- hardening_provision.sh
+	- services_provision.sh
+	- ssh_provision.sh
+	- web_provision.sh
 - README.md
+- vagrantfile
 
 ## Pré-requisitos
 
@@ -18,58 +25,56 @@ Este projeto configura um ambiente de laboratório de administração de redes c
 ## Instruções de Uso
 
 1. Clone o repositório do Github.
-2. Acesse-o pelo terminal e execute o comando "vagrant up" para iniciar a criação das VMs.
-3. Verifique os status de cada VM com o comando "vagrant status" e veja se estão criadas ou não.
-4. Após verificar os status de cada VM, digite "vagrant ssh" junto com o nome da VM (VM1, VM2 OU VM3) para iniciar o shell de cada uma.
-5. Por fim, desligue as VMs digitando "vagrant halt", e caso queira apaga-las, digite "vagrant destroy".
+2. Acesse o diretório pelo terminal e execute o comando "vagrant up" para iniciar o provisionamento do servidor.
+3. Verifique os status do servidor com o comando "vagrant status" e observe se está em execução ou não.
+4. Após verificar os status do servidor, digite "vagrant ssh" junto com o nome da VM (web_server) para iniciar o shell ou também poderá acessar a VM pelo Virtualbox.
+5. Por fim, desligue o servidor digitando "vagrant halt", e caso queira apaga-la, digite "vagrant destroy".
 
-## Configuração de Rede
+# Configuração de Hardware do Ambiente Virtual
 
-1. VM1
-	- IP Privado Estático (192.168.56.10)
-	- DNS
-		- 8.8.8.8
-		- 8.8.4.4
-	-  Atribuição do IP privado estático (192.168.56.9) como Gateway padrão da rede.
-2. VM3
-	- IP Privado Estático (192.168.56.9)
-	- IP Público DHCP - bridge com a interface de rede externa.
-	- IP privado estático adicionado a mesma interface de rede do IP público DHCP.
-	-  DNS
-		- 8.8.8.8
-		- 8.8.4.4
-	- Liberação de portas para tráfego de pacotes entre as redes.
-	- NAT da interface de rede externa mascarado na interface de rede interna.
-	- Atribuição do IP privado estático (192.168.56.9) como Gateway padrão da rede.
+## Especificações Gerais
+
+- **Sistema Operacional Base**: Ubuntu 20.04 (focal64)
+- **Provedor de Virtualização**: VirtualBox
+- **Gerenciador de Ambientes**: Vagrant
+
+---
+
+## Configuração do Hardware da Máquina Virtual
+
+### 1. Servidor Web (`web_server`)
+- **Box**: `ubuntu/focal64`
+- **Hostname**: `web-server`
+- **IP da Rede Privada**: `192.168.56.2`
+- **Rede**:
+  - **Adaptador 1**: NAT
+  - **Adaptador 2**: Host-only
+- **Encaminhamento de Portas**:
+  - Porta 80 (guest) -> Porta 8080 (host) [HTTP]
+  - Porta 22 (guest) -> Porta 2223 (host) [SSH Inicial]
+  - Porta 2222 (guest) -> Porta 2222 (host) [SSH Final]
+- **Hardware**:
+  - **Memória**: 4096 MB
+  - **CPUs**: 4
+  - **Áudio**: Desativado
+- **Pastas Sincronizadas**:
+  - `./DockerDHCP` -> `/vagrantDHCP`
+  - `./DockerWeb` -> `/vagrantWeb`
 
 ## Provisionamento
 
-Os scripts de provisionamento de cada VM está localizado no diretório "Providers". Cada script executa as configurações e a instalação dos serviços necessários para cada VM funcionar conforme sua função.
-1. VM1 - Servidor Web
-	- Instalação do apache.
-2. VM2 - Gateway
-	- Configura-o como Gateway padrão da rede.
+Os scripts de provisionamento do servidor está localizado no diretório "Providers". Cada script executa configurações específicas que garantem o funcionamento e a segurança do servidor.
 
-## Acesso à Internet
+1.Servidor Web
+	- Criação de usuário e atribuição de permissãoes.
+	- Configurações de firewall.
+ 	- Configurações de SSH.
+  	- Configurações de Hardening.
+   	- Instalaçoes de serviços.
+    	- Construção e execução do servidor de apache via docker.
 
-Por meio da conexão à internet recebida por bridge ao DHCP da VM3, a interface de rede interna da VM3 recebe essa conexão e atribui ela ao seu IP privado estático, que por sua vez está na mesma faixa dos IPs das VMs 1 e 2, cada uma dessas VMs estão configuradas com IP da VM3 atuando como Gateway padrão da rede, assim as VMs 1 e 2 dependem da VM3 para terem acesso à internet.
+##Considerações Finais
 
-```mermaid
-sequenceDiagram
-Interface Externa ->> VM3 (DHCP): Envia conexão
-VM3 (DHCP) ->> VM3 (IP Privado): Estabelece conexão
-VM3 (IP Privado) ->> VM1 (IP Privado): Envia acesso à internet
-VM3 (IP Privado)->> VM2 (IP Privado): Envia acesso à internet
-VM1 (IP Privado)-->> VM2 (IP Privado): Se comunica por IP
-VM1 (IP Privado)-->> VM3 (IP Privado): Se comunica por IP
-VM2 (IP Privado)-->> VM1 (IP Privado): Se comunica por IP
-VM2 (IP Privado)-->> VM3 (IP Privado): Se comunica por IP
-VM3 (IP Privado)-->> VM1 (IP Privado): Se comunica por IP
-VM3 (IP Privado)-->> VM2 (IP Privado): Se comunica por IP
-
-```
-Considerações Finais
-
- - O ambiente foi projetado para simular um ambiente de rede típico, permitindo o teste de servidores, gateways e conectividade de rede.
+ - O ambiente foi configurado para simular um servidor de web real.
  - Todos os serviços foram provisionados automaticamente via scripts, mas podem ser ajustados conforme as necessidades.
  - Certifique-se de que as portas necessárias estejam liberadas no firewall do host.
