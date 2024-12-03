@@ -66,7 +66,7 @@ Este projeto configura um servidor WEB "seguro" que tem como base os principais 
 Os scripts de provisionamento do servidor está localizado no diretório "Providers". Cada script executa configurações específicas que garantem o funcionamento e a segurança do servidor.
 
 1. Servidor Web
-- Criação de usuário e atribuição de permissãoes.
+- Criação de usuário e atribuição de permissões.
 - Configurações de firewall.
 - Configurações de SSH.
 - Configurações de Hardening.
