@@ -64,7 +64,7 @@ Este projeto configura um servidor WEB "seguro" que tem como base os principais 
 
 ---
 
-## Instalação e Configuração do Sistema Operacional
+# Instalação e Configuração do Sistema Operacional
 
 ### Etapa 1: Escolha do Sistema Operacional
 
