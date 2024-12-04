@@ -68,7 +68,7 @@ Este projeto configura um servidor WEB "seguro" que tem como base os principais 
 
 ### Etapa 1: Escolha do Sistema Operacional
 
-- Ubuntu Server: Fácil de usar, bem documentado, ideal para servidores de pequeno e médio porte.
+- Ubuntu 20.04.6 LTS (Focal Fossa): Fácil de usar, bem documentado, ideal para servidores de pequeno e médio porte.
 
 Certifique-se de ter backup de dados importantes antes de realizar a instalação.
 Tenha uma lista de configurações planejadas para evitar retrabalhos.
