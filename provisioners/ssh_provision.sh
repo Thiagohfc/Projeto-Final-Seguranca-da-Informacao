@@ -1,12 +1,8 @@
 #!/bin/bash
 
-# Configurar parâmetros do SSH no arquivo sshd_config
-echo "Configurando parâmetros de segurança do SSH..."
-
 # Verificar se as configurações já existem antes de adicionar duplicatas
-#sudo sed -i '/^Port /d' /etc/ssh/sshd_config
-#echo "Port 2222" | sudo tee -a /etc/ssh/sshd_config
-#sudo sed -i 's/^#Port 22/Port 2222/' /etc/ssh/sshd_config
+sudo sed -i '/^Port /d' /etc/ssh/sshd_config
+echo "Port 2222" | sudo tee -a /etc/ssh/sshd_config
 
 sudo sed -i '/^PermitRootLogin /d' /etc/ssh/sshd_config
 echo "PermitRootLogin no" | sudo tee -a /etc/ssh/sshd_config

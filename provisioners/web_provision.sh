@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Baixa a imagem oficial do Apache
-docker pull httpd
-
 # Inicia o container com o Apache, montando o diretório de conteúdo e configuração
 sudo docker build -t meu-apache /vagrantWeb/
 sudo docker run -d --net=host --name apache-container meu-apache

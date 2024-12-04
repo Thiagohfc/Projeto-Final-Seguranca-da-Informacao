@@ -16,12 +16,11 @@ Vagrant.configure("2") do |config|
     #web.vm.network "forwarded_port", guest: 2222, host: 2222, id: "ssh"
     #web.ssh.port = 2222
     web.vm.synced_folder "./DockerWeb", "/vagrantWeb"
-    #config.ssh.username = "dockeruser"
 
     # Provisionamento: Instalação e Configuração
     web.vm.provision "shell", inline: <<-SHELL
       # Atualizações do Sistema
-      sudo apt update && sudo apt upgrade -y
+      sudo apt update # Busca Atualizações
       sudo apt autoremove -y
     
       # Configurando o fuso horário
@@ -34,9 +33,6 @@ Vagrant.configure("2") do |config|
       # Criando o usuário e configurando permissões
       sudo useradd -m -s /bin/bash Web
       echo "Web ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/Web
-
-      # Configurando sem senha para o usuário
-      sudo passwd -d Web
 
       # Configurando permissões na pasta de trabalho
       # Garantindo que os diretórios existam antes de alterar permissões

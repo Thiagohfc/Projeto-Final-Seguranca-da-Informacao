@@ -1,10 +1,8 @@
 #!/bin/bash
 
-# Configuração Básica de Hardening
+# Ativando Apparmor para controle de segurança
 sudo systemctl enable apparmor
 sudo systemctl start apparmor
-sudo chmod 644 /etc/hosts
-sudo chmod 644 /etc/hosts.deny
 
 # Fail2Ban para proteção
 sudo apt install fail2ban -y
