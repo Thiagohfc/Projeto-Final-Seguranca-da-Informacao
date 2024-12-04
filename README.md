@@ -103,7 +103,7 @@ sudo apt update && sudo apt upgrade -y
 sudo nano /etc/netplan/00-installer-config.yaml
 ```
 - Exemplo de configuração:
-```bash
+```sh
 network:
   ethernets:
     eth0:
@@ -208,15 +208,26 @@ Os scripts de provisionamento do servidor está localizado no diretório "Provid
 - Configurações de Hardening.
 ```sh
 # Ativando Apparmor para controle de segurança
-sudo systemctl enable apparmor
-sudo systemctl start apparmor
+sudo systemctl enable apparmor # Configura o serviço AppArmor para iniciar automaticamente durante a inicialização do sistema.
+sudo systemctl start apparmor # Inicia o serviço AppArmor imediatamente, aplicando as políticas configuradas no sistema.
 
 # Fail2Ban para proteção
-sudo apt install fail2ban -y
-sudo systemctl enable fail2ban
-echo -e "[sshd]\nenabled = true\nmaxretry = 3\nbantime = 3600" | sudo tee -a /etc/fail2ban/jail.local
-sudo systemctl restart fail2ban
+sudo apt install fail2ban -y # Instala o software Fail2Ban e confirma sim para tudo.
+sudo systemctl enable fail2ban # Configura o Fail2Ban para ser ativado automaticamente durante a inicialização do sistema.
+echo -e "[sshd]\nenabled = true\nmaxretry = 3\nbantime = 3600" | sudo tee -a /etc/fail2ban/jail.local # Cria ou adiciona configurações no arquivo /etc/fail2ban/jail.local, usado para configurar as regras do Fail2Ban.
+sudo systemctl restart fail2ban # Reinicia o serviço Fail2Ban para aplicar as novas configurações definidas no arquivo /etc/fail2ban/jail.local.
 ```
+	- O AppArmor é um módulo de segurança que aplica políticas restritivas para programas em execução, limitando o acesso a recursos do sistema.
+ 	- Fail2Ban monitora logs do sistema para detectar tentativas de acesso malicioso (como ataques de força bruta) e bloqueia os IPs ofensores.
+```sh
+echo -e "[sshd]\nenabled = true\nmaxretry = 3\nbantime = 3600" | sudo tee -a /etc/fail2ban/jail.local
+
+[sshd]: Define uma seção para proteger o serviço SSH.
+enabled = true: Ativa a proteção para o SSH.
+maxretry = 3: Permite no máximo 3 tentativas de login falhas antes de aplicar um bloqueio.
+bantime = 3600: Define o tempo de bloqueio para IPs infratores como 3600 segundos (1 hora).
+```
+ 	
 - Instalação de serviços essenciais.
 - Configuração e execução do servidor Apache via Docker
 
