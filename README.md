@@ -203,22 +203,77 @@ Os scripts de provisionamento do servidor está localizado no diretório "Provid
 
 1. Servidor Web
 - Criação de usuário e atribuição de permissões.
+```sh
+# Criando o usuário e configurando permissões
+sudo useradd -m -s /bin/bash Web # Cria um novo usuário com nome Web que terá um diretório home "-m" e terá um shell padrão /bin/bash "-s".
+echo "Web ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/Web # Altera nas configurações de sudo para permitir a entrada sem senha.
+
+# Garantindo que os diretórios existam antes de alterar permissões
+if [ -d "/vagrantWeb" ]; then
+	sudo chown -R Web:Web /vagrantWeb # Altera o dono do diretório.
+fi
+
+sudo su Web # acesso o usuário novo.
+```
 - Configurações de firewall.
+```sh
+# Configuração do Firewall
+sudo iptables -F # Remove todas as regras atualmente configuradas em todas as cadeias do iptables (INPUT, OUTPUT, FORWARD).
+sudo iptables -X # Remove todas as cadeias definidas pelo usuário, garantindo que o firewall esteja limpo antes de configurar novas regras.
+
+# Definir políticas padrão
+sudo iptables -P INPUT DROP # Define a política padrão para a cadeia INPUT como DROP, bloqueando qualquer tráfego de entrada que não seja explicitamente permitido.
+sudo iptables -P OUTPUT ACCEPT # Define a política padrão para a cadeia OUTPUT como ACCEPT, permitindo todo o tráfego de saída.
+
+# Permissões de tráfego
+sudo iptables -A INPUT -p tcp --dport 80 -j ACCEPT  # Permite conexões de entrada no protocolo TCP para a porta 80 (usada pelo HTTP).
+sudo iptables -A INPUT -p tcp --dport 443 -j ACCEPT # Permite conexões de entrada no protocolo TCP para a porta 443 (usada pelo HTTPS).
+sudo iptables -A INPUT -p tcp --dport 22 -j ACCEPT # Permite conexões de entrada no protocolo TCP para a porta 22 (usada pelo SSH).
+sudo iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT # Permite pacotes ICMP do tipo echo-request (ping), necessários para verificar a conectividade com o sistema.
+sudo iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT # Permite pacotes de entrada que fazem parte de conexões existentes (ESTABLISHED) ou conexões relacionadas (RELATED) a uma já estabelecida.
+sudo iptables -A INPUT -p udp --sport 53 -j ACCEPT   # Permite pacotes de entrada no protocolo UDP vindos da porta 53, usados para respostas DNS.
+sudo iptables -A INPUT -i lo -j ACCEPT # Permite tráfego de entrada na interface lo (loopback), essencial para o funcionamento interno do sistema.
+```
 - Configurações de SSH.
+```sh
+# Verificar se as configurações já existem antes de adicionar duplicatas
+sudo sed -i '/^Port /d' /etc/ssh/sshd_config # Remove qualquer linha existente no arquivo /etc/ssh/sshd_config que comece com Port para evitar duplicatas ao adicionar a nova configuração.
+echo "Port 2222" | sudo tee -a /etc/ssh/sshd_config # Adiciona ou anexa a configuração Port 2222 ao arquivo, alterando a porta padrão do SSH (22) para 2222, como uma prática de segurança para evitar ataques automatizados.
+
+sudo sed -i '/^PermitRootLogin /d' /etc/ssh/sshd_config # Remove qualquer linha existente no arquivo que comece com PermitRootLogin para evitar duplicatas.
+echo "PermitRootLogin no" | sudo tee -a /etc/ssh/sshd_config # Adiciona ou anexa PermitRootLogin no ao arquivo, desativando logins diretos como root por SSH, melhorando a segurança.
+
+sudo sed -i '/^DenyUsers /d' /etc/ssh/sshd_config # Remove qualquer linha existente que comece com DenyUsers para evitar duplicatas.
+echo "DenyUsers Web" | sudo tee -a /etc/ssh/sshd_config # Adiciona ou anexa DenyUsers Web, proibindo o usuário Web de fazer login via SSH.
+
+#sudo sed -i '/^PubkeyAuthentication /d' /etc/ssh/sshd_config # Quando essas linhas estão ativadas, removem duplicatas da configuração PubkeyAuthentication e configurariam o SSH para aceitar apenas autenticação baseada em chave pública, fortalecendo a segurança.
+#echo "PubkeyAuthentication yes" | sudo tee -a /etc/ssh/sshd_config 
+
+# Reiniciar o serviço SSH para aplicar as mudanças
+sudo systemctl restart sshd # Reinicia o serviço SSH (sshd) para garantir que as novas configurações sejam aplicadas.
+
+# Confirmar se o serviço foi reiniciado corretamente
+if systemctl is-active --quiet sshd; then
+    echo "Configurações aplicadas e serviço SSH reiniciado com sucesso."
+else
+    echo "Erro: O serviço SSH não foi reiniciado corretamente. Verifique o arquivo de configuração."
+fi
+# verifica silenciosamente se o serviço SSH está ativo.
+# Se estiver ativo, exibe uma mensagem de sucesso.
+# Se não estiver ativo, exibe uma mensagem de erro, alertando o usuário para verificar o arquivo de configuração, possivelmente devido a erros de sintaxe ou conflitos.
+```
 - Configurações de Hardening.
 ```sh
-# Ativando Apparmor para controle de segurança
+# Ativando Apparmor que aplica políticas restritivas para programas em execução, limitando o acesso a recursos do sistema
 sudo systemctl enable apparmor # Configura o serviço AppArmor para iniciar automaticamente durante a inicialização do sistema.
 sudo systemctl start apparmor # Inicia o serviço AppArmor imediatamente, aplicando as políticas configuradas no sistema.
 
-# Fail2Ban para proteção
-sudo apt install fail2ban -y # Instala o software Fail2Ban e confirma sim para tudo.
+# Instalando Fail2Ban para monitorar logs do sistema para detectar tentativas de acesso malicioso (como ataques de força bruta) e bloqueia os IPs ofensores.
+sudo apt install fail2ban -y # Instala o software Fail2Ban e confirma "yes" para tudo.
 sudo systemctl enable fail2ban # Configura o Fail2Ban para ser ativado automaticamente durante a inicialização do sistema.
 echo -e "[sshd]\nenabled = true\nmaxretry = 3\nbantime = 3600" | sudo tee -a /etc/fail2ban/jail.local # Cria ou adiciona configurações no arquivo /etc/fail2ban/jail.local, usado para configurar as regras do Fail2Ban.
 sudo systemctl restart fail2ban # Reinicia o serviço Fail2Ban para aplicar as novas configurações definidas no arquivo /etc/fail2ban/jail.local.
 ```
-	- O AppArmor é um módulo de segurança que aplica políticas restritivas para programas em execução, limitando o acesso a recursos do sistema.
- 	- Fail2Ban monitora logs do sistema para detectar tentativas de acesso malicioso (como ataques de força bruta) e bloqueia os IPs ofensores.
 ```sh
 echo -e "[sshd]\nenabled = true\nmaxretry = 3\nbantime = 3600" | sudo tee -a /etc/fail2ban/jail.local
 
@@ -227,9 +282,28 @@ enabled = true: Ativa a proteção para o SSH.
 maxretry = 3: Permite no máximo 3 tentativas de login falhas antes de aplicar um bloqueio.
 bantime = 3600: Define o tempo de bloqueio para IPs infratores como 3600 segundos (1 hora).
 ```
- 	
 - Instalação de serviços essenciais.
+```sh
+# Ferramentas para configurações e testes
+apt install -y net-tools # Pacote com ferramentas de rede.
+sudo apt install -y docker.io # Docker.io é o pacote usado para instalar o Docker Engine, que é a principal ferramenta do Docker. Ele permite criar, gerenciar e executar contêineres.
+sudo systemctl enable docker
+sudo systemctl start docker
+sudo apt install python3-pip -y
+sudo pip3 install docker-compose # Docker-Compose é uma ferramenta complementar ao Docker, usada para orquestrar e gerenciar múltiplos contêineres.
+```
 - Configuração e execução do servidor Apache via Docker
+```sh
+# Inicia o container com o Apache, montando o diretório de conteúdo e configuração
+sudo docker build -t meu-apache /vagrantWeb/  # Cria uma imagem Docker chamada "meu-apache" usando o Dockerfile no diretório /vagrantWeb/
+sudo docker run -d --net=host --name apache-container meu-apache  # Inicia um contêiner chamado "apache-container" baseado na imagem "meu-apache", utilizando a rede do host
+
+# Logs de auditoria
+sudo apt install -y auditd  # Instala o pacote auditd para configurar auditorias de arquivos e eventos no sistema
+sudo systemctl enable auditd  # Garante que o auditd será iniciado automaticamente no boot do sistema
+sudo auditctl -w /vagrantWeb/html -p rwxa  # Configura o auditd para monitorar operações de leitura, escrita, execução e alteração no diretório /vagrantWeb/html
+echo "0 2 * * * rsync -av /var/log/audit/ /backup/logs/" | sudo tee -a /etc/crontab  # Configura o cron para copiar os logs de auditoria do diretório /var/log/audit/ para /backup/logs/ diariamente às 2h
+```
 
 ## Considerações Finais
 
