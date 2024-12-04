@@ -93,7 +93,7 @@ Tenha uma lista de configurações planejadas para evitar retrabalhos.
 **Atualizações do Sistema**
 
 ```bash
-sudo apt update && sudo apt upgrade -y  # Para distribuições baseadas em Debian/Ubuntu
+sudo apt update && sudo apt upgrade -y
 ```
 **Configuração da Rede**
 
